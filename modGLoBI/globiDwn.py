@@ -67,10 +67,10 @@ def generateIds(categories,intxnFile,outputFile,cs=100000):
 
         dfAll = pd.concat([dfSource, dfTarget], axis=1)
         colsNames = ["sourceTaxonId","sourceTaxonName","sourceLifeStageId","sourceLifeStageName","sourceBodyPartId",
-        "sourceBodyPartName","sourcePhysiologicalStateId","sourcePhysiologicalStateName","sourceSexId",
+        "sourceBodyPartName","sourcePhysiologicalStateId","sourcePhysiologicalStateName","sourceSexId", "sourceTaxonPhylumName",
         "sourceSexName","interactionTypeName","interactionTypeId","targetTaxonId",
         "targetTaxonName","targetLifeStageId","targetLifeStageName","targetBodyPartId","targetBodyPartName",
-        "targetPhysiologicalStateId","targetPhysiologicalStateName","targetSexId","targetSexName",
+        "targetPhysiologicalStateId","targetPhysiologicalStateName","targetSexId","targetSexName", "targetTaxonPhylumName",
         "decimalLatitude","decimalLongitude","localityId","localityName",
         "eventDate","referenceCitation","referenceDoi","referenceUrl",
         "sourceCitation","sourceNamespace","sourceArchiveURI","sourceDOI"]
