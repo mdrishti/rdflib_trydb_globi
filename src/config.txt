@@ -1,13 +1,13 @@
 [tsv files]
-trydb_tsv = "../qlever/data/trydb_Datatype.tsv.gz"
-globi_tsv = "../qlever/data/globi.tsv.gz"
-taxonomy_tsv = "../qlever/data/taxonomy.tsv.gz"
+trydb_tsv = ../qlever/data/trydb_Datatype.tsv.gz
+globi_tsv = ../../../globi/intxns_subset_20250110_1.tsv.gz
+taxonomy_tsv = ../qlever/data/taxonomy.tsv.gz
 
 [accessory files]
-trydb_wd = "../qlever/data/accessory/enpkg_wd_pfId.csv.gz"
-enpkg_wd = "../qlever/data/accessory/TRY_tax.txt.gz"
+trydb_wd = ../qlever/data/accessory/enpkg_wd_pfId.csv.gz
+enpkg_wd = ../qlever/data/accessory/TRY_tax.txt.gz
 
 [output files]
-trydb_ttl = "../qlever/data/trydb_output.ttl.gz"
-globi_ttl = "../qlever/data/globi_output.ttl.gz"
-taxonomy_ttl = "../qlever/data/taxonomy_output.ttl.gz"
+trydb_ttl = ../qlever/data/trydb_output.ttl.gz
+globi_ttl = ../../../turtleKG/globi_output_5.ttl.gz
+taxonomy_ttl = ../qlever/data/taxonomy_output.ttl.gz

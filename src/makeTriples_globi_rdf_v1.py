@@ -11,8 +11,10 @@ import rdflib
 from rdflib import URIRef, Literal, Namespace, RDF, RDFS, XSD, DCTERMS, Graph, BNode
 import gzip
 import argparse
+import configparser
 import sys
 import re
+import os
 
 sys.path.append('./functions')  # Add the 'src' directory to the sys.path
 import data_processing as dp
@@ -115,11 +117,11 @@ def generate_rdf_in_batches(input_csv_gz, join_csv, output_file, join_column, ba
 
     if(ch == 1):
         data2 = pd.read_csv(join_csv, compression="gzip", sep="\t", dtype=str)
-        merged_data = dp.filter_file_runtime(input_csv_gz, data2, key_column=join_column)
+        merged_data = dp.filter_file_runtime_taxonomy(input_csv_gz, data2, key_column=join_column)
     else:
         merged_data = pd.read_csv(input_csv_gz, compression="gzip", sep="\t", dtype=str, encoding="utf-8")
-    #print("merged file with following dimensions")
-    #print(merged_data.shape)
+    print("merged file with following dimensions")
+    print(merged_data.shape)
 
     #data1 = pd.read_csv(input_csv_gz, compression="gzip", sep="\t", dtype=str, encoding="utf-8", quoting=3)
     
@@ -173,7 +175,7 @@ def generate_rdf_in_batches(input_csv_gz, join_csv, output_file, join_column, ba
             source_taxon_uri = emiBox[f"SAMPLE-{dp.format_uri(row['sourceTaxonId'])}-inRec{i}"] if dp.is_none_na_or_empty(row['sourceTaxonId']) else None
             target_taxon_uri = emiBox[f"SAMPLE-{dp.format_uri(row['targetTaxonId'])}-inRec{i}"] if dp.is_none_na_or_empty(row['targetTaxonId']) else None
 
-            intxn_type_uri = emiBox[f"INTERACTION-{row['interactionTypeName']}"] if dp.is_none_na_or_empty(row['interactionTypeName']) else None
+            intxn_type_uri = emiBox[f"{row['interactionTypeName']}"] if dp.is_none_na_or_empty(row['interactionTypeName']) else None
             intxn_type_Id_uri = URIRef(f"{row['interactionTypeId']}") if dp.is_none_na_or_empty(row['interactionTypeId']) else None #maybe add RO as namespace
             intxnRec_uri = emiBox[f"inRec{i}"]
 
@@ -188,14 +190,15 @@ def generate_rdf_in_batches(input_csv_gz, join_csv, output_file, join_column, ba
             if dp.is_none_na_or_empty(target_taxon_uri):
                 graph.add((intxnRec_uri, emi.hasTarget, target_taxon_uri))
 
-            if dp.is_none_na_or_empty(intxn_type_uri):
-                graph.add((intxnRec_uri, emi.isClassifiedWith, intxn_type_uri))
-                graph.add((intxn_type_uri, RDF.type, emi.InteractionType))
-            if dp.is_none_na_or_empty(intxn_type_Id_uri):
+            if dp.is_none_na_or_empty(intxn_type_uri) and dp.is_none_na_or_empty(intxn_type_Id_uri):
                 graph.add((intxnRec_uri, emi.isClassifiedWith, intxn_type_Id_uri))
                 graph.add((intxn_type_Id_uri, RDF.type, emi.InteractionType))
-                if dp.is_none_na_or_empty(intxn_type_uri):
-                    graph.add((intxn_type_uri, dcterms.identifier,intxn_type_Id_uri))
+                graph.add((intxn_type_Id_uri, RDFS.label, Literal(row['interactionTypeName'], datatype=XSD.string)))
+            if not dp.is_none_na_or_empty(intxn_type_Id_uri):
+                graph.add((intxnRec_uri, emi.isClassifiedWith, intxn_type_uri))
+                graph.add((intxn_type_uri, RDF.type, emi.InteractionType))
+#                if dp.is_none_na_or_empty(intxn_type_uri):
+#                    graph.add((intxn_type_uri, dcterms.identifier,intxn_type_Id_uri))
 
             if dp.is_none_na_or_empty(row['localityName']):
                 graph.add((intxnRec_uri, prov.atLocation, Literal(row['localityName'], datatype=XSD.string)))
@@ -275,17 +278,18 @@ def generate_rdf_in_batches(input_csv_gz, join_csv, output_file, join_column, ba
         
         # Serialize the graph for the batch and write to the file
         with gzip.open(output_file, "at", encoding="utf-8") as out_file:  # Append mode
+            print("written triples for",)
             out_file.write(graph.serialize(format="turtle_custom"))
         # Clear the graph to free memory
         del graph
-        #print(out_file)
+
 
     print(f"RDF triples saved to {output_file}")
 
 # Main execution
 if __name__ == "__main__":
     configFile = "config.txt"
-    if os.path.exists(file_path):       #if config file is available
+    if os.path.exists(configFile):       #if config file is available
         config = configparser.ConfigParser()
         config.read(configFile)
         csv_file1 = config.get('tsv files', 'globi_tsv')
