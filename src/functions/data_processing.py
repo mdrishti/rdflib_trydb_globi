@@ -36,6 +36,22 @@ def filter_file_runtime(file_path, filter_df, key_column):
     
     return matching_rows
 
+# Define a function for real-time filtering by phylum name
+def filter_file_runtime_taxonomy(file_path, filter_df, key_column):
+    # Read the file in chunks for runtime processing
+    cs = 10000  # Adjust chunk size as needed
+    matching_rows = pd.DataFrame()  # To store filtered rows
+    phylumName = ["Arthropoda", "Nematoda"]
+    kingdomName = ["Archaeplastida"]
+    for chunk in pd.read_csv(file_path, compression="gzip", sep="\t", dtype=str, encoding="utf-8", chunksize=cs):
+        # Filter rows where 'key_column' matches values in filter_df
+        filtered_chunk = chunk[chunk['targetTaxonKingdomName'].isin(kingdomName) | chunk['sourceTaxonKingdomName'].isin(kingdomName) | chunk['targetTaxonPhylumName'].isin(phylumName) | chunk['sourceTaxonPhylumName'].isin(phylumName)]
+        
+        # Append matching rows to the result DataFrame
+        matching_rows = pd.concat([matching_rows, filtered_chunk], ignore_index=True)
+    
+    return matching_rows
+
 def add_inverse_relationships(graph):
     INVERSE_RELATIONS = {
     "http://purl.org/dc/terms/isPartOf": "http://purl.org/dc/terms/hasPart",
